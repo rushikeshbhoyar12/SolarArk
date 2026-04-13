@@ -1,0 +1,79 @@
+# ==========================================
+# FRONTEND IGNORES (Vite/React)
+# ==========================================
+# Dependencies
+SolarArk/node_modules/
+SolarArk/dist/
+SolarArk/dist-ssr/
+SolarArk/package-lock.json
+
+# Environment variables
+SolarArk/.env
+SolarArk/.env.local
+SolarArk/.env.*.local
+
+# Build & Cache
+SolarArk/.vscode/
+SolarArk/.idea/
+SolarArk/.cache/
+SolarArk/coverage/
+
+# OS
+SolarArk/.DS_Store
+SolarArk/Thumbs.db
+
+# Logs
+SolarArk/logs/
+SolarArk/*.log
+
+# ==========================================
+# BACKEND IGNORES (Node.js/Express/MongoDB)
+# ==========================================
+# Dependencies
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/package-lock.json
+
+# Environment variables (DO NOT COMMIT!)
+backend/.env
+backend/.env.admin
+backend/.env.auth
+backend/.env.forms
+backend/.env.local
+backend/.env.*.local
+
+# Build & Logs
+backend/logs/
+backend/*.log
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/.cache/
+backend/temp/
+
+# IDE & OS
+backend/.vscode/
+backend/.idea/
+backend/.DS_Store
+
+# ==========================================
+# GENERAL PROJECT IGNORES
+# ==========================================
+# OS files
+.DS_Store
+Thumbs.db
+*.pem
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+.turbo/
+.cache/
+
+# Asset folders (large media files)
+
+SolarArk/src/assets/
+
+

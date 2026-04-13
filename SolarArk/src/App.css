@@ -1,0 +1,510 @@
+@media (min-width: 1024px) {
+
+  .t-img,
+  .b-img {
+    width: 28rem;
+    height: 20rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-link {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .last {
+    padding-bottom: 25px;
+  }
+
+  .quick-contact {
+    gap: 50px;
+  }
+
+  .quick-link {
+    padding-left: 20px;
+  }
+
+  .solar-dot1 {
+    width: 30px;
+    bottom: 30px;
+  }
+
+  .second-question-column {
+    padding-top: 60px;
+  }
+
+  .get-consultation-btn {
+    margin-left: 60px;
+  }
+
+  .city {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .second-que {
+    font-size: 32px;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .solution-content-sub {
+    height: 300px;
+  }
+
+  .mobile-section {
+    flex-direction: column;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    /* padding-bottom: 1rem; */
+    padding-top: 3rem;
+  }
+
+  .mobile-slide-buttons {
+    display: flex !important;
+  }
+
+  .top-image,
+  .bottom-image {
+    margin-right: 0;
+    right: 0;
+    top: 0;
+  }
+
+  .top-image3,
+  .bottom-image4 {
+    margin-right: 0;
+    right: 0;
+    top: 0;
+  }
+
+  .top-image {
+    top: -60px;
+    right: 40px;
+    height: 50%;
+  }
+
+  .bottom-image {
+    top: 10px;
+    /* Adjust to control vertical overlap */
+    left: 100px;
+  }
+
+  .top-image3 {
+    top: -55px;
+    right: 10px;
+    height: 50%;
+  }
+
+  .bottom-image4 {
+    top: 35px;
+    /* Adjust to control vertical overlap */
+    left: 120px;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .bg-orange-500.text-white.px-6.py-2.rounded {
+    margin: 1rem auto;
+    width: fit-content;
+  }
+
+  .desktop-button,
+  .desktop-text {
+    display: none;
+  }
+
+  .left-img,
+  .right-img {
+    height: 180%;
+  }
+
+  .side-img {
+    height: 120%;
+  }
+
+  /* .mobile-only {
+    display: block;
+  } */
+
+  .mobile-text {
+    font-size: 13px;
+    position: relative;
+    top: 18px;
+  }
+
+  .mobile-button {
+    margin: 50px 0px 0px 120px;
+    margin-bottom: 4px;
+  }
+
+  .top-design {
+    margin-top: -40px;
+  }
+
+  .bottom-design {
+    margin-bottom: 10px;
+  }
+
+  .second-img {
+    padding-right: 10px;
+    border-radius: 10px;
+  }
+
+  .desktop-follow {
+    display: none;
+  }
+
+  .head-text {
+    font-size: 10px;
+    text-align: center;
+    justify-content: center;
+    right: 0;
+    left: 0;
+  }
+
+  /* .solar-logo {
+    padding: 6px;
+    width: 100px;
+    object-fit: cover;
+  } */
+  .solar-logo {
+    padding: 6px;
+    /* width: 100px;
+    height: 50px;  */
+    object-fit: contain;
+  }
+
+  .questing-img {
+    display: none;
+  }
+
+  .carousel-text {
+    padding: 100px 30px 0px 30px;
+  }
+
+  .project-flex {
+    height: 100px;
+  }
+
+  .testimonial {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .testimonial-left {
+    margin-bottom: 150px;
+  }
+
+  .testimonial-right {
+    margin-bottom: 150px;
+  }
+
+  .project-icons {
+    display: none;
+  }
+
+  .project-icon-text {
+    font-size: 8px;
+  }
+
+  .project-icons-mobile1 {
+    left: 0px;
+    bottom: -90px;
+  }
+
+  .project-icons-mobile2 {
+    left: 0px;
+    bottom: -90px;
+  }
+
+  .project-icons-mobile3 {
+    left: 0px;
+    bottom: -50px;
+  }
+
+  .curve-desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+
+  .mobile-only,
+  .mobile-button {
+    display: none;
+  }
+
+  .mobile-curve {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+
+  .project-icons-mobile1,
+  .project-icons-mobile2,
+  .project-icons-mobile3 {
+    display: none;
+  }
+
+  .head-text {
+    right: 0;
+    top: 0;
+    margin-right: 20px;
+  }
+
+  .solar-logo {
+    width: 145px;
+    height: 47px;
+  }
+
+  .quick-link {
+    padding-left: 120px;
+  }
+
+  .project-flex {
+    height: 400px;
+  }
+
+  .main-flex {
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+}
+
+.solar-colour {
+  color: rgb(153, 12, 12);
+}
+
+.contact-solar {
+  background-color: rgb(170, 36, 36);
+}
+
+.slide-btn {
+  /* background-color: rgb(144, 24, 24); */
+  background-color: rgba(119, 11, 11, 0.871);
+}
+
+.dotted {
+  background-image: url("assets/images/dotted-pattern.jpg");
+}
+
+.solution-content-sub {
+  height: auto;
+}
+
+.imgpanel {
+  width: 80px;
+  height: 80px;
+}
+
+.text-animation {
+  font-size: 3rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  white-space: nowrap;
+  font-weight: bold;
+  color: #960c0c;
+  padding: 20px;
+}
+
+.bus-animation {
+  width: 150px;
+  height: auto;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  animation: moveBus 5s linear forwards;
+  z-index: 1;
+  opacity: 1;
+}
+
+@keyframes moveBus {
+  0% {
+    left: 30%;
+    right: 30%;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .text-animation {
+    font-size: 3rem;
+    padding: 15px;
+  }
+}
+
+/* Media Query for Small Screens (Mobile) */
+@media (max-width: 768px) {
+  .text-animation {
+    font-size: 2rem;
+    padding: 10px;
+  }
+}
+
+/* Media Query for Extra Small Screens */
+@media (max-width: 480px) {
+  .text-animation {
+    font-size: 1.2rem;
+  }
+}
+
+/* .otherIcons0{
+  /* left: `${pos.x}px`, top: (index === 1) ? `136 px` : `${pos.y}px */
+.textsize {
+  font-size: 55px;
+}
+
+@media (max-width: 640px) {
+  .custom-grid img {
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .custom-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* .fade-in {
+  animation: fadeIn 1.5s ease-in-out;
+} */
+.fade-in {
+  opacity: 0;
+  /* Hidden initially */
+  transform: translateY(20px);
+  transition: opacity 1.8s ease-in-out, transform 1.8s ease-in-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: fadeIn 1.8s ease-in-out;
+}
+
+/* src/components/ScrollButton.css */
+.scroll-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(186, 89, 89, 0.871);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+.scroll-button:hover {
+  background: rgb(214, 122, 122);
+  transform: scale(1.1);
+}
+
+.scroll-button.show {
+  opacity: 1;
+}
+
+.scroll-icon {
+  font-size: 24px;
+}
+
+/* Responsive design adjustments for mobile */
+@media (max-width: 768px) {
+  .scroll-button {
+    /* width: 40px;
+    height: 40px;
+    font-size: 20px; */
+    position: fixed;
+    /* Keeps the button fixed on the screen */
+    bottom: 80px;
+    /* Distance from the bottom of the viewport */
+    right: 30px;
+    /* Distance from the right of the viewport */
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    z-index: 999;
+  }
+
+  .scroll-icon {
+    font-size: 20px;
+  }
+}
+
+.slick-slide {
+  display: flex;
+  justify-content: center;
+}
+
+select option:disabled {
+  color: gray;
+}
+
+/* vedio */
+/*  */
+
+/* .card-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Number of lines to show */
+/* -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+} */
+.desktop-follow a {
+  position: relative;
+  z-index: 10;
+}
+
+.bg {
+  background-color: rgb(254, 245, 245);
+}
+
+.btncolor {
+  background-color: #a55e5e;
+  color: white;
+}
+
+.contact {
+  color: rgb(115, 5, 5);
+}
