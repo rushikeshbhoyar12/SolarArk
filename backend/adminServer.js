@@ -61,7 +61,7 @@ const adminSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['superadmin', 'manager', 'viewer'], default: 'manager' },
+    role: { type: String, enum: ['admin'], default: 'admin' },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -180,7 +180,7 @@ const verifyAdminToken = (req, res, next) => {
 
 // ===== ADMIN AUTH ROUTES =====
 
-// // 1. ADMIN SIGNUP (Only for superadmin)
+// // 1. ADMIN SIGNUP (Only for admin)
 // app.post('/api/admin/signup', async (req, res) => {
 //     try {
 //         const { name, email, password, role } = req.body;
@@ -194,7 +194,7 @@ const verifyAdminToken = (req, res, next) => {
 //             return res.status(400).json({ message: 'Admin already exists' });
 //         }
 
-//         const admin = new AdminUser({ name, email, password, role: role || 'manager' });
+//         const admin = new AdminUser({ name, email, password, role: role || 'admin' });
 //         await admin.save();
 
 //         const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET || 'your_secret_key', {

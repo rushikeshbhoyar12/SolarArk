@@ -76,7 +76,7 @@ servers.forEach((server) => {
                 console.log('📱 Access your application:');
                 console.log('   🌐 Website: http://localhost:5173');
                 console.log('   🔐 Admin Panel: http://localhost:5173/admin');
-                console.log('   📧 Login: admin@solarark.com / admin123\n');
+                console.log('   📧 See SETUP_GUIDE.md for admin credential setup\n');
                 console.log('💻 Backend Servers:');
                 console.log('   • Auth Server: http://localhost:5000');
                 console.log('   • Forms Server: http://localhost:5800');
