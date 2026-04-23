@@ -443,7 +443,7 @@ const EarnWithUs = () => {
                                     type="text"
                                     placeholder="Full Name"
                                     name="fullName"
-                                    className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                                     value={formData.fullName}
                                     onChange={handleChange}
                                     required
@@ -456,7 +456,7 @@ const EarnWithUs = () => {
                                     type="email"
                                     placeholder="Email"
                                     name="email"
-                                    className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                                     value={formData.email}
                                     onChange={handleChange}
                                     required
@@ -471,7 +471,7 @@ const EarnWithUs = () => {
                                     type="text"
                                     placeholder="Phone Number"
                                     name="phoneNumber"
-                                    className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                                     value={formData.phoneNumber}
                                     onChange={handleChange}
                                     required
@@ -484,7 +484,7 @@ const EarnWithUs = () => {
                                     type="text"
                                     placeholder="Address"
                                     name="address"
-                                    className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                                    className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                                     value={formData.address}
                                     onChange={handleChange}
                                     required

@@ -21,6 +21,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/solarark'
     .catch(err => console.log('❌ Admin Server: MongoDB Connection Error:', err));
 
 // ===== EMAIL CONFIGURATION =====
+console.log('🔍 Admin Email Config Debug:');
+console.log('SMTP_EMAIL:', process.env.SMTP_EMAIL);
+console.log('SMTP_PASSWORD length:', process.env.SMTP_PASSWORD?.length);
+console.log('SMTP_PASSWORD first 5 chars:', process.env.SMTP_PASSWORD?.substring(0, 5));
+console.log('SMTP_PASSWORD last 5 chars:', process.env.SMTP_PASSWORD?.substring(process.env.SMTP_PASSWORD.length - 5));
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -41,6 +47,11 @@ const sendEmail = async (to, subject, htmlContent) => {
         return true;
     } catch (error) {
         console.error('❌ Email send error:', error);
+        console.error('Auth config:', {
+            user: process.env.SMTP_EMAIL,
+            passLength: process.env.SMTP_PASSWORD?.length,
+            passStart: process.env.SMTP_PASSWORD?.substring(0, 5)
+        });
         return false;
     }
 };
@@ -98,8 +109,11 @@ const contactSchema = new mongoose.Schema({
     companyPinCode: { type: String, required: true },
     averageElectricBill: { type: String, required: true },
     status: { type: String, enum: ['unread', 'read', 'replied'], default: 'unread' },
-    reply: { type: String, default: '' },
-    repliedAt: { type: Date, default: null },
+    replies: [{
+        message: { type: String, required: true },
+        sentAt: { type: Date, default: Date.now },
+        sentBy: { type: String, default: 'admin' }
+    }],
     submittedAt: { type: Date, default: Date.now }
 });
 
@@ -119,6 +133,19 @@ const careerSchema = new mongoose.Schema({
 });
 
 const Career = mongoose.model('Career', careerSchema);
+
+// ===== EARN WITH US SCHEMA (FROM FORM SERVER) =====
+const earnWithUsSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    email: { type: String, required: true, lowercase: true },
+    phoneNumber: { type: String, required: true },
+    address: { type: String, required: true },
+    status: { type: String, enum: ['new', 'contacted', 'processed'], default: 'new' },
+    notes: { type: String, default: '' },
+    submittedAt: { type: Date, default: Date.now }
+});
+
+const EarnWithUs = mongoose.model('EarnWithUs', earnWithUsSchema);
 
 // ===== JOB POSTING SCHEMA (FOR CAREERS PAGE) =====
 const jobSchema = new mongoose.Schema({
@@ -153,37 +180,37 @@ const verifyAdminToken = (req, res, next) => {
 
 // ===== ADMIN AUTH ROUTES =====
 
-// 1. ADMIN SIGNUP (Only for superadmin)
-app.post('/api/admin/signup', async (req, res) => {
-    try {
-        const { name, email, password, role } = req.body;
+// // 1. ADMIN SIGNUP (Only for superadmin)
+// app.post('/api/admin/signup', async (req, res) => {
+//     try {
+//         const { name, email, password, role } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'All fields are required' });
-        }
+//         if (!name || !email || !password) {
+//             return res.status(400).json({ message: 'All fields are required' });
+//         }
 
-        const existingAdmin = await AdminUser.findOne({ email });
-        if (existingAdmin) {
-            return res.status(400).json({ message: 'Admin already exists' });
-        }
+//         const existingAdmin = await AdminUser.findOne({ email });
+//         if (existingAdmin) {
+//             return res.status(400).json({ message: 'Admin already exists' });
+//         }
 
-        const admin = new AdminUser({ name, email, password, role: role || 'manager' });
-        await admin.save();
+//         const admin = new AdminUser({ name, email, password, role: role || 'manager' });
+//         await admin.save();
 
-        const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET || 'your_secret_key', {
-            expiresIn: '7d'
-        });
+//         const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET || 'your_secret_key', {
+//             expiresIn: '7d'
+//         });
 
-        res.status(201).json({
-            message: 'Admin signup successful!',
-            token,
-            admin: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
-        });
-    } catch (error) {
-        console.error('Admin Signup Error:', error);
-        res.status(500).json({ message: 'Server error during signup' });
-    }
-});
+//         res.status(201).json({
+//             message: 'Admin signup successful!',
+//             token,
+//             admin: { id: admin._id, name: admin.name, email: admin.email, role: admin.role }
+//         });
+//     } catch (error) {
+//         console.error('Admin Signup Error:', error);
+//         res.status(500).json({ message: 'Server error during signup' });
+//     }
+// });
 
 // 2. ADMIN LOGIN
 app.post('/api/admin/login', async (req, res) => {
@@ -227,7 +254,7 @@ app.get('/api/admin/bookings', verifyAdminToken, async (req, res) => {
         const { status, city, sort } = req.query;
         let filter = {};
 
-        if (status) filter.status = status;
+        if (status) filter.status = status;//created status key in filter object if status query param is provided
         if (city) filter.city = city;
 
         const bookings = await Booking.find(filter).sort({ submittedAt: sort === 'old' ? 1 : -1 });
@@ -346,48 +373,65 @@ app.get('/api/admin/contacts/:id', verifyAdminToken, async (req, res) => {
 app.put('/api/admin/contacts/:id', verifyAdminToken, async (req, res) => {
     try {
         const { reply, status } = req.body;
-        const updateData = { status: status || 'replied', reply, repliedAt: new Date() };
 
-        const contact = await Contact.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true }
-        );
+        if (!reply || reply.trim() === '') {
+            return res.status(400).json({ message: 'Reply message cannot be empty' });
+        }
 
+        const contact = await Contact.findById(req.params.id);
         if (!contact) {
             return res.status(404).json({ message: 'Contact not found' });
         }
 
-        // Send reply email to contact if reply is provided
-        if (reply) {
-            const replyEmailHTML = `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <div style="background-color: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                        <h2 style="margin: 0;">Response from SolarARK</h2>
-                    </div>
-                    <div style="background-color: #f8f8f8; padding: 20px; border-radius: 0 0 8px 8px;">
-                        <p>Hello <strong>${contact.name}</strong>,</p>
-                        <p>Thank you for reaching out to SolarARK. Here's our response to your inquiry:</p>
-                        <div style="background-color: white; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0; border-radius: 4px;">
-                            <p style="margin: 0; color: #333;">${reply}</p>
-                        </div>
-                        <p>If you have any further questions, please feel free to reply to this email.</p>
-                        <p>Best regards,<br><strong>SolarARK Team</strong></p>
-                        <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
-                        <p style="font-size: 12px; color: #666; margin-top: 20px;">
-                            <strong>Original Inquiry:</strong><br>
-                            Company: ${contact.companyName}<br>
-                            WhatsApp: ${contact.whatsAppNumber}<br>
-                            City: ${contact.city}
-                        </p>
-                    </div>
-                </div>
-            `;
-
-            await sendEmail(contact.email, 'Response to Your SolarARK Inquiry', replyEmailHTML);
+        // Initialize replies array if it doesn't exist
+        if (!contact.replies) {
+            contact.replies = [];
         }
 
-        res.status(200).json({ message: 'Contact updated successfully and email sent', contact });
+        // Add new reply to the replies array
+        contact.replies.push({
+            message: reply,
+            sentAt: new Date(),
+            sentBy: 'admin'
+        });
+
+        // Update status if provided, otherwise set to 'replied'
+        contact.status = status || 'replied';
+
+        await contact.save();
+
+        // Send reply email to contact
+        const replyEmailHTML = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                    <h2 style="margin: 0;">Response from SolarARK</h2>
+                </div>
+                <div style="background-color: #f8f8f8; padding: 20px; border-radius: 0 0 8px 8px;">
+                    <p>Hello <strong>${contact.name}</strong>,</p>
+                    <p>Thank you for reaching out to SolarARK. Here's our response to your inquiry:</p>
+                    <div style="background-color: white; padding: 15px; border-left: 4px solid #dc2626; margin: 20px 0; border-radius: 4px;">
+                        <p style="margin: 0; color: #333;">${reply}</p>
+                    </div>
+                    <p>If you have any further questions, please feel free to reply to this email.</p>
+                    <p>Best regards,<br><strong>SolarARK Team</strong></p>
+                    <hr style="margin-top: 30px; border: none; border-top: 1px solid #ddd;">
+                    <p style="font-size: 12px; color: #666; margin-top: 20px;">
+                        <strong>Original Inquiry:</strong><br>
+                        Company: ${contact.companyName}<br>
+                        WhatsApp: ${contact.whatsAppNumber}<br>
+                        City: ${contact.city}
+                    </p>
+                </div>
+            </div>
+        `;
+
+        const emailSent = await sendEmail(contact.email, 'Response to Your SolarARK Inquiry', replyEmailHTML);
+
+        res.status(200).json({
+            message: 'Reply added successfully and email sent',
+            contact,
+            emailSent
+        });
     } catch (error) {
         console.error('Update Contact Error:', error);
         res.status(500).json({ message: 'Error updating contact' });
@@ -471,6 +515,76 @@ app.delete('/api/admin/careers/:id', verifyAdminToken, async (req, res) => {
         res.status(200).json({ message: 'Career deleted successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Error deleting career' });
+    }
+});
+
+// ===== EARN WITH US APPLICATIONS MANAGEMENT =====
+
+// GET ALL EARN WITH US APPLICATIONS
+app.get('/api/admin/earnwithus', verifyAdminToken, async (req, res) => {
+    try {
+        const { status } = req.query;
+        let filter = {};
+
+        if (status) filter.status = status;
+
+        const applications = await EarnWithUs.find(filter).sort({ submittedAt: -1 });
+        res.status(200).json(applications);
+    } catch (error) {
+        console.error('Get Earn With Us Error:', error);
+        res.status(500).json({ message: 'Error fetching applications' });
+    }
+});
+
+// GET SINGLE EARN WITH US APPLICATION
+app.get('/api/admin/earnwithus/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const application = await EarnWithUs.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+        res.status(200).json(application);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching application' });
+    }
+});
+
+// UPDATE EARN WITH US APPLICATION STATUS
+app.put('/api/admin/earnwithus/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const { status, notes } = req.body;
+
+        if (!status) {
+            return res.status(400).json({ message: 'Status is required' });
+        }
+
+        const application = await EarnWithUs.findByIdAndUpdate(
+            req.params.id,
+            { status, notes: notes || '' },
+            { new: true }
+        );
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        res.status(200).json({ message: 'Application updated successfully', application });
+    } catch (error) {
+        console.error('Update Application Error:', error);
+        res.status(500).json({ message: 'Error updating application' });
+    }
+});
+
+// DELETE EARN WITH US APPLICATION
+app.delete('/api/admin/earnwithus/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const application = await EarnWithUs.findByIdAndDelete(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+        res.status(200).json({ message: 'Application deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting application' });
     }
 });
 

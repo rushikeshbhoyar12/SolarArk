@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
-dotenv.config();
+dotenv.config({ path: '.env.forms' });
 
 const app = express();
 const PORT = process.env.PORT || 5800;
@@ -19,6 +19,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/solarark'
     .catch(err => console.log('❌ MongoDB Connection Error:', err));
 
 // ===== EMAIL CONFIGURATION =====
+console.log('🔍 Email Config Debug:');
+console.log('SMTP_EMAIL:', process.env.SMTP_EMAIL);
+console.log('SMTP_PASSWORD length:', process.env.SMTP_PASSWORD?.length);
+console.log('SMTP_PASSWORD first 5 chars:', process.env.SMTP_PASSWORD?.substring(0, 5));
+console.log('SMTP_PASSWORD last 5 chars:', process.env.SMTP_PASSWORD?.substring(process.env.SMTP_PASSWORD.length - 5));
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -40,6 +46,11 @@ const sendEmail = async (to, subject, htmlContent) => {
         return true;
     } catch (error) {
         console.error('❌ Email send error:', error);
+        console.error('Auth config:', {
+            user: process.env.SMTP_EMAIL,
+            passLength: process.env.SMTP_PASSWORD?.length,
+            passStart: process.env.SMTP_PASSWORD?.substring(0, 5)
+        });
         return false;
     }
 };
@@ -66,10 +77,28 @@ const contactSchema = new mongoose.Schema({
     city: { type: String, required: true },
     companyPinCode: { type: String, required: true },
     averageElectricBill: { type: String, required: true },
+    status: { type: String, enum: ['unread', 'read', 'replied'], default: 'unread' },
+    replies: [{
+        message: { type: String, required: true },
+        sentAt: { type: Date, default: Date.now },
+        sentBy: { type: String, default: 'admin' }
+    }],
     submittedAt: { type: Date, default: Date.now }
 });
 
 const Contact = mongoose.model('Contact', contactSchema);
+
+// ===== EARN WITH US SCHEMA =====
+const earnWithUsSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    email: { type: String, required: true, lowercase: true },
+    phoneNumber: { type: String, required: true },
+    address: { type: String, required: true },
+    status: { type: String, enum: ['new', 'contacted', 'processed'], default: 'new' },
+    submittedAt: { type: Date, default: Date.now }
+});
+
+const EarnWithUs = mongoose.model('EarnWithUs', earnWithUsSchema);
 
 // ===== STATES DATA =====
 const statesData = [
@@ -273,6 +302,94 @@ app.get('/api/contacts', async (req, res) => {
     } catch (error) {
         console.error('Fetch Contacts Error:', error);
         res.status(500).json({ message: 'Error fetching contacts' });
+    }
+});
+
+// 6. EARN WITH US FORM SUBMISSION
+app.post('/api/earnwithus', async (req, res) => {
+    try {
+        const { fullName, email, phoneNumber, address } = req.body;
+
+        // Validation
+        if (!fullName || !email || !phoneNumber || !address) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        // Validate email format
+        const emailRegex = /\S+@\S+\.\S+/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ message: 'Valid email is required' });
+        }
+
+        // Validate phone number
+        const phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(phoneNumber)) {
+            return res.status(400).json({ message: 'Valid 10-digit phone number is required' });
+        }
+
+        // Save to database
+        const earnWithUsSubmission = new EarnWithUs({
+            fullName,
+            email,
+            phoneNumber,
+            address
+        });
+
+        await earnWithUsSubmission.save();
+
+        // Send confirmation email to user
+        const userEmailHTML = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background-color: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                    <h2 style="margin: 0;">Application Received - SolarARK</h2>
+                </div>
+                <div style="background-color: #f8f8f8; padding: 20px; border-radius: 0 0 8px 8px;">
+                    <p>Hello <strong>${fullName}</strong>,</p>
+                    <p>Thank you for your interest in earning with SolarARK! We have received your application.</p>
+                    <h3>Your Information:</h3>
+                    <ul>
+                        <li><strong>Name:</strong> ${fullName}</li>
+                        <li><strong>Email:</strong> ${email}</li>
+                        <li><strong>Phone:</strong> ${phoneNumber}</li>
+                        <li><strong>Address:</strong> ${address}</li>
+                    </ul>
+                    <p>Our team will review your application and get back to you shortly with exciting opportunities!</p>
+                    <p>Best regards,<br><strong>SolarARK Team</strong></p>
+                </div>
+            </div>
+        `;
+
+        await sendEmail(email, 'Earn With Us - Application Received', userEmailHTML);
+
+        // Send notification to admin
+        const adminEmailHTML = `
+            <h2>New Earn With Us Application</h2>
+            <p><strong>Name:</strong> ${fullName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phoneNumber}</p>
+            <p><strong>Address:</strong> ${address}</p>
+            <p>Submitted At: ${new Date().toLocaleString()}</p>
+        `;
+
+        await sendEmail(process.env.ADMIN_EMAIL || 'admin@solarark.com', 'New Earn With Us Application', adminEmailHTML);
+
+        res.status(201).json({
+            message: 'Application submitted successfully! Check your email for confirmation.'
+        });
+    } catch (error) {
+        console.error('Earn With Us Form Error:', error);
+        res.status(500).json({ message: 'Error submitting application' });
+    }
+});
+
+// 7. GET ALL EARN WITH US APPLICATIONS (for admin)
+app.get('/api/earnwithus', async (req, res) => {
+    try {
+        const applications = await EarnWithUs.find().sort({ submittedAt: -1 });
+        res.status(200).json(applications);
+    } catch (error) {
+        console.error('Fetch Earn With Us Error:', error);
+        res.status(500).json({ message: 'Error fetching applications' });
     }
 });
 

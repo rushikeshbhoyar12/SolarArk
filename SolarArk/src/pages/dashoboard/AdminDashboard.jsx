@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     const [bookings, setBookings] = useState([]);
     const [contacts, setContacts] = useState([]);
     const [careers, setCareers] = useState([]);
+    const [earnWithUs, setEarnWithUs] = useState([]);
     const [jobs, setJobs] = useState([]);
     const [summary, setSummary] = useState({});
     const [loading, setLoading] = useState(false);
@@ -130,6 +131,69 @@ const AdminDashboard = () => {
         setLoading(false);
     };
 
+    // Fetch Earn With Us Applications
+    const fetchEarnWithUs = async () => {
+        if (!adminToken) return;
+        setLoading(true);
+        try {
+            const response = await axios.get(`${ADMIN_API}/earnwithus`, {
+                headers: { Authorization: `Bearer ${adminToken}` }
+            });
+            setEarnWithUs(response.data);
+        } catch (error) {
+            if (error.response?.status === 401) {
+                handleLogout('Session expired. Please login again.');
+            } else {
+                console.error('Error fetching Earn With Us applications:', error.message);
+            }
+        }
+        setLoading(false);
+    };
+
+    // Delete Earn With Us Application
+    const deleteEarnWithUs = async (id) => {
+        if (window.confirm('Are you sure you want to delete this application?')) {
+            try {
+                await axios.delete(`${ADMIN_API}/earnwithus/${id}`, {
+                    headers: { Authorization: `Bearer ${adminToken}` }
+                });
+                fetchEarnWithUs();
+                alert('Application deleted successfully!');
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    handleLogout('Session expired. Please login again.');
+                } else {
+                    alert('Error deleting application: ' + error.message);
+                }
+            }
+        }
+    };
+
+    // Delete All Earn With Us Applications
+    const deleteAllEarnWithUs = async () => {
+        if (window.confirm('Are you sure you want to delete ALL Earn With Us applications? This cannot be undone.')) {
+            try {
+                setLoading(true);
+                // Delete all applications one by one
+                for (const application of earnWithUs) {
+                    await axios.delete(`${ADMIN_API}/earnwithus/${application._id}`, {
+                        headers: { Authorization: `Bearer ${adminToken}` }
+                    });
+                }
+                fetchEarnWithUs();
+                alert('All applications deleted successfully!');
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    handleLogout('Session expired. Please login again.');
+                } else {
+                    alert('Error deleting applications: ' + error.message);
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     // Update Booking Status
     const updateBookingStatus = async (id, status, notes) => {
         try {
@@ -143,6 +207,25 @@ const AdminDashboard = () => {
                 handleLogout('Session expired. Please login again.');
             } else {
                 alert('Error updating booking: ' + error.message);
+            }
+        }
+    };
+
+    // Delete Booking
+    const deleteBooking = async (id) => {
+        if (window.confirm('Are you sure you want to delete this booking?')) {
+            try {
+                await axios.delete(`${ADMIN_API}/bookings/${id}`, {
+                    headers: { Authorization: `Bearer ${adminToken}` }
+                });
+                fetchBookings();
+                alert('Booking deleted successfully!');
+            } catch (error) {
+                if (error.response?.status === 401) {
+                    handleLogout('Session expired. Please login again.');
+                } else {
+                    alert('Error deleting booking: ' + error.message);
+                }
             }
         }
     };
@@ -291,9 +374,21 @@ const AdminDashboard = () => {
         if (activeTab === 'dashboard') fetchDashboard();
         else if (activeTab === 'bookings') fetchBookings();
         else if (activeTab === 'contacts') fetchContacts();
+        else if (activeTab === 'earnwithus') fetchEarnWithUs();
         else if (activeTab === 'careers') fetchCareers();
         else if (activeTab === 'jobs') fetchJobs();
     }, [activeTab, adminToken]);
+
+    // Initial load: fetch bookings and contacts when user logs in
+    useEffect(() => {
+        if (!adminToken) return;
+
+        // Load initial data
+        fetchDashboard();
+        fetchBookings();
+        fetchContacts();
+        fetchEarnWithUs();
+    }, [adminToken]);
 
     // Auto-refresh data every 5 seconds
     useEffect(() => {
@@ -303,6 +398,7 @@ const AdminDashboard = () => {
             if (activeTab === 'dashboard') fetchDashboard();
             else if (activeTab === 'bookings') fetchBookings();
             else if (activeTab === 'contacts') fetchContacts();
+            else if (activeTab === 'earnwithus') fetchEarnWithUs();
             else if (activeTab === 'careers') fetchCareers();
             else if (activeTab === 'jobs') fetchJobs();
         }, 5000);
@@ -368,7 +464,7 @@ const AdminDashboard = () => {
             {/* Tabs */}
             <div className="bg-white border-b">
                 <div className="max-w-7xl mx-auto flex gap-4 p-4">
-                    {['dashboard', 'bookings', 'contacts', 'careers', 'jobs'].map((tab) => (
+                    {['dashboard', 'bookings', 'contacts', 'earnwithus', 'careers', 'jobs'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -377,7 +473,7 @@ const AdminDashboard = () => {
                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                 }`}
                         >
-                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                            {tab === 'earnwithus' ? 'Earn With Us' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
                     ))}
                 </div>
@@ -444,17 +540,28 @@ const AdminDashboard = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <select
-                                                        value={booking.status}
-                                                        onChange={(e) => updateBookingStatus(booking._id, e.target.value, booking.notes)}
-                                                        className="px-2 py-1 border rounded"
-                                                    >
-                                                        {getValidBookingStatuses(booking.status).map((status) => (
-                                                            <option key={status} value={status}>
-                                                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                    <div className="flex gap-2">
+                                                        <select
+                                                            value={booking.status}
+                                                            onChange={(e) => updateBookingStatus(booking._id, e.target.value, booking.notes)}
+                                                            className="px-2 py-1 border rounded text-sm"
+                                                        >
+                                                            {getValidBookingStatuses(booking.status).map((status) => (
+                                                                <option key={status} value={status}>
+                                                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        {booking.status === 'completed' && (
+                                                            <button
+                                                                onClick={() => deleteBooking(booking._id)}
+                                                                className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm font-bold"
+                                                                title="Delete completed booking"
+                                                            >
+                                                                🗑️ Delete
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -513,6 +620,73 @@ const AdminDashboard = () => {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* EARN WITH US TAB */}
+                {activeTab === 'earnwithus' && (
+                    <div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold text-gray-800">Manage Earn With Us Applications</h2>
+                            {earnWithUs.length > 0 && (
+                                <button
+                                    onClick={deleteAllEarnWithUs}
+                                    disabled={loading}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-bold disabled:opacity-50"
+                                >
+                                    🗑️ Delete All
+                                </button>
+                            )}
+                        </div>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : (
+                            <div className="bg-white rounded-lg shadow overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-red-600 text-white">
+                                        <tr>
+                                            <th className="px-4 py-2 text-left">Name</th>
+                                            <th className="px-4 py-2 text-left">Email</th>
+                                            <th className="px-4 py-2 text-left">Phone</th>
+                                            <th className="px-4 py-2 text-left">City</th>
+                                            <th className="px-4 py-2 text-left">Status</th>
+                                            <th className="px-4 py-2 text-left">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {earnWithUs.map((application) => (
+                                            <tr key={application._id} className="border-b hover:bg-gray-50">
+                                                <td className="px-4 py-2">{application.fullName}</td>
+                                                <td className="px-4 py-2">{application.email}</td>
+                                                <td className="px-4 py-2">{application.phoneNumber}</td>
+                                                <td className="px-4 py-2">{application.address}</td>
+                                                <td className="px-4 py-2">
+                                                    <span className={`px-3 py-1 rounded text-sm font-bold ${application.status === 'new' ? 'bg-yellow-200' :
+                                                        application.status === 'contacted' ? 'bg-blue-200' :
+                                                            'bg-green-200'
+                                                        }`}>
+                                                        {application.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <button
+                                                        onClick={() => deleteEarnWithUs(application._id)}
+                                                        className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-bold"
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                {earnWithUs.length === 0 && (
+                                    <div className="p-4 text-center text-gray-500">
+                                        No Earn With Us applications yet.
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>

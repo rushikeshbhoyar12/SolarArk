@@ -124,7 +124,7 @@ const BookingForm = () => {
                 type="text"
                 placeholder="Full Name"
                 name="fullName"
-                className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 value={formData.fullName}
                 onChange={handleChange}
                 required
@@ -139,7 +139,7 @@ const BookingForm = () => {
                 type="email"
                 placeholder="Email"
                 name="email"
-                className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -156,7 +156,7 @@ const BookingForm = () => {
                 type="text"
                 placeholder="Phone Number"
                 name="phoneNumber"
-                className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 value={formData.phoneNumber}
                 onChange={handleChange}
                 required
@@ -171,7 +171,7 @@ const BookingForm = () => {
                 type="text"
                 placeholder="Pin Code"
                 name="pinCode"
-                className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 value={formData.pinCode}
                 onChange={handleChange}
                 required
@@ -186,7 +186,7 @@ const BookingForm = () => {
                 type="text"
                 placeholder="City"
                 name="city"
-                className="w-full px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 value={formData.city}
                 onChange={handleChange}
                 required
@@ -202,7 +202,7 @@ const BookingForm = () => {
               name="electricBill"
               value={formData.electricBill}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+              className="w-full px-3 py-2 text-white border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
               required
             >
               <option value="" disabled>
